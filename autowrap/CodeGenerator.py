@@ -765,22 +765,25 @@ class CodeGenerator(object):
         (call_arg,), cleanups, (in_type,) =\
             self._create_fun_decl_and_input_conversion(meth_code, "__getitem__", mdcl)
 
-        meth_code.add("""
-                     |    cdef long _idx = $call_arg
-                     """, locals())
-
-        if in_type.is_unsigned:
+        # if $call_arg is a string then this definition of _idx breaks functionality
+        # so hack it out of the way for now
+        if in_type.is_long:
             meth_code.add("""
-                        |    if _idx < 0:
-                        |        raise IndexError("invalid index %d" % _idx)
-                        """, locals())
+                         |    cdef long _idx = $call_arg
+                         """, locals())
 
-        size_guard = mdcl.cpp_decl.annotations.get("wrap-upper-limit")
-        if size_guard:
-            meth_code.add("""
-                     |    if _idx >= self.inst.get().$size_guard:
-                     |        raise IndexError("invalid index %d" % _idx)
-                     """, locals())
+            if in_type.is_unsigned:
+                meth_code.add("""
+                            |    if _idx < 0:
+                            |        raise IndexError("invalid index %d" % _idx)
+                            """, locals())
+
+            size_guard = mdcl.cpp_decl.annotations.get("wrap-upper-limit")
+            if size_guard:
+                meth_code.add("""
+                         |    if _idx >= self.inst.get().$size_guard:
+                         |        raise IndexError("invalid index %d" % _idx)
+                         """, locals())
 
         # call wrapped method and convert result value back to python
 
