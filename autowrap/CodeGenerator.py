@@ -941,6 +941,7 @@ class CodeGenerator(object):
                    |from  smart_ptr cimport shared_ptr
                    |from  AutowrapRefHolder cimport AutowrapRefHolder
                    |from  libcpp cimport bool
+                   |from  libcpp cimport complex
                    |from  libc.string cimport const_char
                    |from cython.operator cimport dereference as deref,
                    + preincrement as inc, address as address
